@@ -19,4 +19,4 @@ class Borrowing(models.Model):
         return f"{self.user}: {[book.title for book in self.book.all()]}"
 
     class Meta:
-        ordering = ["-borrow_date"]
+        ordering = ["actual_return_date", "-borrow_date"]

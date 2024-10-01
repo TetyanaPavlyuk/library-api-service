@@ -4,9 +4,10 @@ from rest_framework import serializers
 from book.models import Book
 from book.serializers import BookSerializer
 from borrowing.models import Borrowing
+from user.serializers import UserShortSerializer
 
 
-class BorrowingSerializer(serializers.ModelSerializer):
+class BorrowingAdminSerializer(serializers.ModelSerializer):
     book = serializers.PrimaryKeyRelatedField(
         many=True,
         queryset=Book.objects.all(),
@@ -15,7 +16,7 @@ class BorrowingSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Borrowing
-        fields = ["id", "expected_return_date", "actual_return_date", "book"]
+        fields = ["id", "user", "book", "expected_return_date"]
 
     def create(self, validated_data):
         with transaction.atomic():
@@ -29,13 +30,56 @@ class BorrowingSerializer(serializers.ModelSerializer):
                     book.save()
 
                 else:
-                    raise serializers.ValidationError(f"Book {book.title} isn't available for borrowing")
+                    raise serializers.ValidationError(f"Book {book.title} isn't available for borrowing today.")
             return borrowing
 
+    def update(self, instance, validated_data):
+        with transaction.atomic():
+            return_date = validated_data.get("actual_return_date", None)
 
-class BorrowingListSerializer(serializers.ModelSerializer):
-    book = BookSerializer(many=True, read_only=True)
+            if instance.actual_return_date and return_date is not None:
+                raise serializers.ValidationError("Books have already been returned.")
+
+            if return_date is not None:
+                instance.actual_return_date = return_date
+                instance.save()
+                for book in instance.book.all():
+                    book.inventory += 1
+                    book.save()
+
+            return instance
+
+
+class BorrowingUserSerializer(BorrowingAdminSerializer):
+    class Meta:
+        model = Borrowing
+        fields = ["id", "book", "expected_return_date"]
+
+
+class BorrowingListAdminSerializer(serializers.ModelSerializer):
+    book = serializers.SlugRelatedField(
+        slug_field="title",
+        many=True,
+        queryset=Book.objects.all(),
+    )
+    user = UserShortSerializer()
 
     class Meta:
         model = Borrowing
+        fields = ["id", "borrow_date", "expected_return_date", "actual_return_date", "book", "user"]
+
+
+class BorrowingListUserSerializer(BorrowingListAdminSerializer):
+    class Meta:
+        model = Borrowing
         fields = ["id", "borrow_date", "expected_return_date", "actual_return_date", "book"]
+
+
+class BorrowingRetrieveSerializer(BorrowingListAdminSerializer):
+    book = BookSerializer(many=True, read_only=True)
+
+
+class BorrowingUpdateSerializer(BorrowingAdminSerializer):
+    class Meta:
+        model = Borrowing
+        fields = ["actual_return_date"]

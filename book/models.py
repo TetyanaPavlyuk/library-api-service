@@ -15,7 +15,7 @@ class Book(models.Model):
     daily_fee = models.DecimalField(max_digits=5, decimal_places=2, default=0)
 
     def __str__(self):
-        return f"{self.title} ({self.author})"
+        return f"{self.title} - {self.author} ({self.inventory})"
 
     class Meta:
         ordering = ["title"]
