@@ -26,6 +26,12 @@ class UserSerializer(serializers.ModelSerializer):
         """Create user with encrypted password"""
         return get_user_model().objects.create_user(**validated_data)
 
+
+class UserUpdateSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = get_user_model()
+        fields = ["id", "email", "first_name", "last_name"]
+
     def update(self, instance, validated_data):
         """Update a user, set the password correctly and return it"""
         password = validated_data.pop("password", None)
@@ -34,3 +40,9 @@ class UserSerializer(serializers.ModelSerializer):
             user.set_password(password)
             user.save()
         return user
+
+
+class UserShortSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = get_user_model()
+        fields = ["id", "email", "full_name"]
