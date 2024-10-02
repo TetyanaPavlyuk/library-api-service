@@ -1,4 +1,5 @@
 from rest_framework import mixins
+from rest_framework.pagination import PageNumberPagination
 from rest_framework.viewsets import GenericViewSet
 
 from borrowing.models import Borrowing
@@ -13,6 +14,11 @@ from borrowing.serializers import (
 )
 
 
+class BorrowingPagination(PageNumberPagination):
+    page_size = 10
+    max_page_size = 50
+
+
 class BorrowingViewSet(
     mixins.CreateModelMixin,
     mixins.ListModelMixin,
@@ -23,14 +29,25 @@ class BorrowingViewSet(
 ):
     queryset = Borrowing.objects.all()
     permission_classes = (AdminOrIsAuthenticatedCreateAndReadOnly, )
+    pagination_class = BorrowingPagination
 
     def get_queryset(self):
         queryset = self.queryset
+        is_active = self.request.query_params.get("is_active")
+        user_id = self.request.query_params.get("user_id")
+
         if self.action == "list":
             queryset = queryset.select_related().prefetch_related("book")
+            if is_active == "true" or is_active == "True":
+                queryset = queryset.filter(actual_return_date__isnull=True)
+            elif is_active == "false" or is_active == "False":
+                queryset = queryset.filter(actual_return_date__isnull=False)
 
         user = self.request.user
         if user.is_staff:
+            if user_id is not None:
+                user_id_list = user_id.split(",")
+                queryset = queryset.filter(user_id__in=user_id_list)
             return queryset
         return queryset.filter(user=user)
 
