@@ -10,9 +10,7 @@ class Borrowing(models.Model):
     actual_return_date = models.DateField(null=True, blank=True)
     book = models.ManyToManyField(Book, related_name="borrowing")
     user = models.ForeignKey(
-        get_user_model(),
-        on_delete=models.CASCADE,
-        related_name="borrowings"
+        get_user_model(), on_delete=models.CASCADE, related_name="borrowings"
     )
 
     def __str__(self):

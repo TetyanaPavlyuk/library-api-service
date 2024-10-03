@@ -10,7 +10,7 @@ from borrowing.serializers import (
     BorrowingListAdminSerializer,
     BorrowingListUserSerializer,
     BorrowingRetrieveSerializer,
-    BorrowingUpdateSerializer
+    BorrowingUpdateSerializer,
 )
 
 
@@ -24,11 +24,10 @@ class BorrowingViewSet(
     mixins.ListModelMixin,
     mixins.RetrieveModelMixin,
     mixins.UpdateModelMixin,
-    mixins.DestroyModelMixin,
-    GenericViewSet
+    GenericViewSet,
 ):
     queryset = Borrowing.objects.all()
-    permission_classes = (AdminOrIsAuthenticatedCreateAndReadOnly, )
+    permission_classes = (AdminOrIsAuthenticatedCreateAndReadOnly,)
     pagination_class = BorrowingPagination
 
     def get_queryset(self):

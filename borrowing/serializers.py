@@ -9,9 +9,7 @@ from user.serializers import UserShortSerializer
 
 class BorrowingAdminSerializer(serializers.ModelSerializer):
     book = serializers.PrimaryKeyRelatedField(
-        many=True,
-        queryset=Book.objects.all(),
-        required=True
+        many=True, queryset=Book.objects.all(), required=True
     )
 
     class Meta:
@@ -30,7 +28,12 @@ class BorrowingAdminSerializer(serializers.ModelSerializer):
                     book.save()
 
                 else:
-                    raise serializers.ValidationError(f"Book {book.title} isn't available for borrowing today.")
+                    raise serializers.ValidationError(
+                        f"Book {book.title} isn't available for borrowing today."
+                    )
+
+            borrowing.save()
+
             return borrowing
 
     def update(self, instance, validated_data):
@@ -66,13 +69,26 @@ class BorrowingListAdminSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Borrowing
-        fields = ["id", "borrow_date", "expected_return_date", "actual_return_date", "book", "user"]
+        fields = [
+            "id",
+            "borrow_date",
+            "expected_return_date",
+            "actual_return_date",
+            "book",
+            "user",
+        ]
 
 
 class BorrowingListUserSerializer(BorrowingListAdminSerializer):
     class Meta:
         model = Borrowing
-        fields = ["id", "borrow_date", "expected_return_date", "actual_return_date", "book"]
+        fields = [
+            "id",
+            "borrow_date",
+            "expected_return_date",
+            "actual_return_date",
+            "book",
+        ]
 
 
 class BorrowingRetrieveSerializer(BorrowingListAdminSerializer):
