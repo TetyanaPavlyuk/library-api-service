@@ -36,22 +36,6 @@ class BorrowingAdminSerializer(serializers.ModelSerializer):
 
             return borrowing
 
-    def update(self, instance, validated_data):
-        with transaction.atomic():
-            return_date = validated_data.get("actual_return_date", None)
-
-            if instance.actual_return_date and return_date is not None:
-                raise serializers.ValidationError("Books have already been returned.")
-
-            if return_date is not None:
-                instance.actual_return_date = return_date
-                instance.save()
-                for book in instance.book.all():
-                    book.inventory += 1
-                    book.save()
-
-            return instance
-
 
 class BorrowingUserSerializer(BorrowingAdminSerializer):
     class Meta:
@@ -93,9 +77,3 @@ class BorrowingListUserSerializer(BorrowingListAdminSerializer):
 
 class BorrowingRetrieveSerializer(BorrowingListAdminSerializer):
     book = BookSerializer(many=True, read_only=True)
-
-
-class BorrowingUpdateSerializer(BorrowingAdminSerializer):
-    class Meta:
-        model = Borrowing
-        fields = ["actual_return_date"]

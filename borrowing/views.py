@@ -1,5 +1,10 @@
-from rest_framework import mixins
+from datetime import date
+
+from django.db import transaction
+from rest_framework import mixins, status
+from rest_framework.decorators import action
 from rest_framework.pagination import PageNumberPagination
+from rest_framework.response import Response
 from rest_framework.viewsets import GenericViewSet
 
 from borrowing.models import Borrowing
@@ -10,7 +15,6 @@ from borrowing.serializers import (
     BorrowingListAdminSerializer,
     BorrowingListUserSerializer,
     BorrowingRetrieveSerializer,
-    BorrowingUpdateSerializer,
 )
 
 
@@ -23,7 +27,6 @@ class BorrowingViewSet(
     mixins.CreateModelMixin,
     mixins.ListModelMixin,
     mixins.RetrieveModelMixin,
-    mixins.UpdateModelMixin,
     GenericViewSet,
 ):
     queryset = Borrowing.objects.all()
@@ -58,8 +61,6 @@ class BorrowingViewSet(
             return BorrowingListUserSerializer
         elif self.action == "retrieve":
             return BorrowingRetrieveSerializer
-        elif self.action == "update":
-            return BorrowingUpdateSerializer
 
         if self.request.user.is_staff:
             return BorrowingAdminSerializer
@@ -71,3 +72,30 @@ class BorrowingViewSet(
             serializer.save()
         else:
             serializer.save(user=self.request.user)
+
+    @action(
+        methods=["POST"],
+        detail=True,
+        url_path="return"
+    )
+    def return_book(self, request, pk=None):
+        borrowing = self.get_object()
+        return_date = date.today()
+
+        if borrowing.actual_return_date is not None:
+            return Response(
+                {"detail": "Books have already been returned."},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+
+        with transaction.atomic():
+            borrowing.actual_return_date = return_date
+            borrowing.save()
+            for book in borrowing.book.all():
+                book.inventory += 1
+                book.save()
+
+        return Response(
+            {"detail": f"Books {[book.title for book in borrowing.book.all()]} have been returned."},
+            status=status.HTTP_200_OK
+        )
