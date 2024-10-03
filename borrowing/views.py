@@ -4,6 +4,7 @@ from django.db import transaction
 from rest_framework import mixins, status
 from rest_framework.decorators import action
 from rest_framework.pagination import PageNumberPagination
+from rest_framework.permissions import IsAdminUser
 from rest_framework.response import Response
 from rest_framework.viewsets import GenericViewSet
 
@@ -76,7 +77,8 @@ class BorrowingViewSet(
     @action(
         methods=["POST"],
         detail=True,
-        url_path="return"
+        url_path="return",
+        permission_classes=(IsAdminUser, )
     )
     def return_book(self, request, pk=None):
         borrowing = self.get_object()
