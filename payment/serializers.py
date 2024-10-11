@@ -2,7 +2,6 @@ from rest_framework import serializers
 
 from utils.stripe import create_stripe_session_for_borrowing
 from borrowing.models import Borrowing
-from borrowing.serializers import BorrowingListAdminSerializer
 from payment.models import Payment
 
 
@@ -85,4 +84,29 @@ class PaymentResultSerializer(serializers.Serializer):
 
 
 class PaymentRetrieveSerializer(PaymentSerializer):
-    borrowing = BorrowingListAdminSerializer(many=False, read_only=True)
+    borrowing_user = serializers.CharField(source="borrowing.user")
+    borrowing_books = serializers.SlugRelatedField(
+        many=True,
+        read_only=True,
+        source="borrowing.book",
+        slug_field="title",
+    )
+
+    class Meta:
+        model = Payment
+        fields = [
+            "id",
+            "status",
+            "type",
+            "borrowing_user",
+            "borrowing_books",
+            "session_url",
+            "session_id",
+            "money_to_pay",
+        ]
+
+
+class PaymentSlimSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Payment
+        fields = ["id", "status", "type", "money_to_pay"]

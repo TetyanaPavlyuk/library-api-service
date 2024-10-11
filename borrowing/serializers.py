@@ -4,6 +4,7 @@ from rest_framework import serializers
 from book.models import Book
 from book.serializers import BookSerializer
 from borrowing.models import Borrowing
+from payment.serializers import PaymentSlimSerializer
 from user.serializers import UserShortSerializer
 
 
@@ -50,6 +51,7 @@ class BorrowingListAdminSerializer(serializers.ModelSerializer):
         queryset=Book.objects.all(),
     )
     user = UserShortSerializer()
+    payment = PaymentSlimSerializer(many=True, source="payments")
 
     class Meta:
         model = Borrowing
@@ -60,6 +62,7 @@ class BorrowingListAdminSerializer(serializers.ModelSerializer):
             "actual_return_date",
             "book",
             "user",
+            "payment",
         ]
 
 
@@ -72,6 +75,7 @@ class BorrowingListUserSerializer(BorrowingListAdminSerializer):
             "expected_return_date",
             "actual_return_date",
             "book",
+            "payment"
         ]
 
 
