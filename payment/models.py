@@ -13,12 +13,19 @@ class Payment(models.Model):
         PAYMENT = "PAYMENT", _("Payment")
         FINE = "FINE", _("Fine")
 
-    status = models.CharField(max_length=8, choices=Status.choices, default=Status.PENDING)
+    status = models.CharField(
+        max_length=8, choices=Status.choices, default=Status.PENDING
+    )
     type = models.CharField(max_length=8, choices=Type.choices, default=Type.PAYMENT)
-    borrowing = models.OneToOneField(Borrowing, on_delete=models.CASCADE)
+    borrowing = models.ForeignKey(Borrowing, on_delete=models.CASCADE)
     session_url = models.URLField(blank=True)
     session_id = models.CharField(max_length=100, blank=True, null=True)
     money_to_pay = models.DecimalField(max_digits=10, decimal_places=2, default=0)
+
+    class Meta:
+        constraints = [
+            models.UniqueConstraint(fields=["type", "borrowing"], name="unique_payment"),
+        ]
 
     def __str__(self):
         return f"{self.type} ({self.borrowing.user.full_name}): {self.status}"
