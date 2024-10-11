@@ -1,6 +1,7 @@
 from datetime import date
 
 from django.db import transaction
+from django.shortcuts import redirect
 from rest_framework import mixins, status
 from rest_framework.decorators import action
 from rest_framework.pagination import PageNumberPagination
@@ -73,6 +74,14 @@ class BorrowingViewSet(
             serializer.save()
         else:
             serializer.save(user=self.request.user)
+
+    def create(self, request, *args, **kwargs):
+        serializer = self.get_serializer(data=request.data)
+        if serializer.is_valid():
+            self.perform_create(serializer)
+            redirect_url = "http://127.0.0.1:8000/api/library/payments/create_payment"
+            return Response(status=status.HTTP_302_FOUND, headers={"Location": redirect_url})
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
     @action(
         methods=["POST"],
