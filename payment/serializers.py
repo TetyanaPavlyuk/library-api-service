@@ -4,6 +4,7 @@ import stripe
 from rest_framework import serializers
 
 from borrowing.models import Borrowing
+from borrowing.serializers import BorrowingListAdminSerializer
 from payment.models import Payment
 
 
@@ -20,6 +21,7 @@ class PaymentSerializer(serializers.ModelSerializer):
             "money_to_pay",
         ]
         read_only_fields = [
+            "id",
             "status",
             "type",
             "borrowing",
@@ -95,3 +97,7 @@ class CreatePaymentSerializer(serializers.Serializer):
 
 class PaymentResultSerializer(serializers.Serializer):
     message = serializers.ReadOnlyField()
+
+
+class PaymentRetrieveSerializer(PaymentSerializer):
+    borrowing = BorrowingListAdminSerializer(many=False, read_only=True)

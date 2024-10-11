@@ -5,7 +5,8 @@ from rest_framework.response import Response
 from rest_framework.viewsets import ModelViewSet
 
 from payment.models import Payment
-from payment.serializers import PaymentSerializer, CreatePaymentSerializer, PaymentResultSerializer
+from payment.serializers import PaymentSerializer, CreatePaymentSerializer, PaymentResultSerializer, \
+    PaymentRetrieveSerializer
 
 
 class PaymentViewSet(ModelViewSet):
@@ -13,15 +14,21 @@ class PaymentViewSet(ModelViewSet):
 
     def get_queryset(self):
         user = self.request.user
-        if user.is_staff:
-            return Payment.objects.all()
-        return Payment.objects.filter(borrowing__user=user)
+        if self.action == "retrieve":
+            queryset = Payment.objects.select_related().prefetch_related("borrowing__book")
+        else:
+            queryset = self.queryset
+        if not user.is_staff:
+            queryset = queryset.filter(borrowing__user=user)
+        return queryset
 
     def get_serializer_class(self):
         if self.action == "create_payment":
             return CreatePaymentSerializer
         if self.action in ["success", "cancel"]:
             return PaymentResultSerializer
+        if self.action == "retrieve":
+            return PaymentRetrieveSerializer
         return PaymentSerializer
 
     @action(detail=False, methods=["POST"], url_path="create_payment")
