@@ -10,23 +10,21 @@ from payment.serializers import (
     PaymentSerializer,
     CreatePaymentSerializer,
     PaymentResultSerializer,
-    PaymentRetrieveSerializer
+    PaymentRetrieveSerializer,
 )
 
 
 class PaymentViewSet(ModelViewSet):
-    queryset = Payment.objects.all()
+    queryset = Payment.objects.select_related("borrowing__user").prefetch_related(
+        "borrowing__book"
+    )
     permission_classes = [permissions.IsAuthenticated, CanNotEditAndDeletePayments]
 
     def get_queryset(self):
         user = self.request.user
-        if self.action == "retrieve":
-            queryset = Payment.objects.select_related().prefetch_related("borrowing__book")
-        else:
-            queryset = self.queryset
         if not user.is_staff:
-            queryset = queryset.filter(borrowing__user=user)
-        return queryset
+            return self.queryset.filter(borrowing__user=user)
+        return self.queryset
 
     def get_serializer_class(self):
         if self.action == "create_payment":
@@ -39,7 +37,9 @@ class PaymentViewSet(ModelViewSet):
 
     @action(detail=False, methods=["POST"], url_path="create_payment")
     def create_payment(self, request):
-        serializer = CreatePaymentSerializer(data=request.data, context={"request": request})
+        serializer = CreatePaymentSerializer(
+            data=request.data, context={"request": request}
+        )
         if serializer.is_valid():
             payment = serializer.save()
             return Response(
@@ -48,7 +48,12 @@ class PaymentViewSet(ModelViewSet):
             )
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
-    @action(detail=False, methods=["GET"], url_path="success", permission_classes=(permissions.AllowAny,))
+    @action(
+        detail=False,
+        methods=["GET"],
+        url_path="success",
+        permission_classes=(permissions.AllowAny,),
+    )
     def success(self, request):
         session_id = request.query_params.get("session_id")
         session = stripe.checkout.Session.retrieve(session_id)
@@ -62,7 +67,12 @@ class PaymentViewSet(ModelViewSet):
         serializer = PaymentResultSerializer({"message": "Payment not completed"})
         return Response(serializer.data, status=status.HTTP_400_BAD_REQUEST)
 
-    @action(detail=False, methods=["GET"], url_path="cancel", permission_classes=(permissions.AllowAny,))
+    @action(
+        detail=False,
+        methods=["GET"],
+        url_path="cancel",
+        permission_classes=(permissions.AllowAny,),
+    )
     def cancel(self, request):
         serializer = PaymentResultSerializer({"message": "Payment was cancelled"})
         return Response(serializer.data, status=status.HTTP_200_OK)

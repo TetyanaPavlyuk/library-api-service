@@ -24,7 +24,9 @@ class Payment(models.Model):
 
     class Meta:
         constraints = [
-            models.UniqueConstraint(fields=["type", "borrowing"], name="unique_payment"),
+            models.UniqueConstraint(
+                fields=["type", "borrowing"], name="unique_payment"
+            ),
         ]
 
     def __str__(self):
