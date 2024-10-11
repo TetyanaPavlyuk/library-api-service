@@ -1,16 +1,22 @@
 import stripe.checkout
 from rest_framework import status, permissions
-from rest_framework.decorators import action, permission_classes
+from rest_framework.decorators import action
 from rest_framework.response import Response
 from rest_framework.viewsets import ModelViewSet
 
 from payment.models import Payment
-from payment.serializers import PaymentSerializer, CreatePaymentSerializer, PaymentResultSerializer, \
+from payment.permissions import CanNotEditAndDeletePayments
+from payment.serializers import (
+    PaymentSerializer,
+    CreatePaymentSerializer,
+    PaymentResultSerializer,
     PaymentRetrieveSerializer
+)
 
 
 class PaymentViewSet(ModelViewSet):
     queryset = Payment.objects.all()
+    permission_classes = [permissions.IsAuthenticated, CanNotEditAndDeletePayments]
 
     def get_queryset(self):
         user = self.request.user
