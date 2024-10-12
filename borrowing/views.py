@@ -1,11 +1,10 @@
 from datetime import date
 
 from django.db import transaction
-from django.shortcuts import redirect
 from rest_framework import mixins, status
 from rest_framework.decorators import action
 from rest_framework.pagination import PageNumberPagination
-from rest_framework.permissions import IsAdminUser
+from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.viewsets import GenericViewSet
 
@@ -41,7 +40,7 @@ class BorrowingViewSet(
         user_id = self.request.query_params.get("user_id")
 
         if self.action == "list":
-            queryset = queryset.select_related().prefetch_related("book")
+            queryset = queryset.select_related().prefetch_related("book", "payments")
             if is_active == "true" or is_active == "True":
                 queryset = queryset.filter(actual_return_date__isnull=True)
             elif is_active == "false" or is_active == "False":
@@ -87,7 +86,7 @@ class BorrowingViewSet(
         methods=["POST"],
         detail=True,
         url_path="return",
-        permission_classes=(IsAdminUser, )
+        permission_classes=(IsAuthenticated, )
     )
     def return_book(self, request, pk=None):
         borrowing = self.get_object()
@@ -105,6 +104,17 @@ class BorrowingViewSet(
             for book in borrowing.book.all():
                 book.inventory += 1
                 book.save()
+
+        if return_date > borrowing.expected_return_date:
+            redirect_url = "http://127.0.0.1:8000/api/library/payments/create_fine"
+            return Response(
+                {
+                    "detail": f"Books {[book.title for book in borrowing.book.all()]} have been returned. "
+                           f"Borrowing is overdue. Please pay the fine.",
+                    "fine_url": redirect_url
+                },
+                status=status.HTTP_200_OK
+            )
 
         return Response(
             {"detail": f"Books {[book.title for book in borrowing.book.all()]} have been returned."},
