@@ -17,6 +17,7 @@ from borrowing.serializers import (
     BorrowingListUserSerializer,
     BorrowingRetrieveSerializer,
 )
+from payment.models import Payment
 
 
 class BorrowingPagination(PageNumberPagination):
@@ -75,12 +76,18 @@ class BorrowingViewSet(
             serializer.save(user=self.request.user)
 
     def create(self, request, *args, **kwargs):
+        user = self.request.user
+        if Payment.objects.filter(borrowing__user=user, status="PENDING").exists():
+            return Response(
+                {"detail": "You have at least one pending payment - borrowing is forbidden"},
+                status=status.HTTP_403_FORBIDDEN,
+            )
         serializer = self.get_serializer(data=request.data)
-        if serializer.is_valid():
-            self.perform_create(serializer)
-            redirect_url = "http://127.0.0.1:8000/api/library/payments/create_payment"
-            return Response(status=status.HTTP_302_FOUND, headers={"Location": redirect_url})
-        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+        serializer.is_valid(raise_exception=True)
+        self.perform_create(serializer)
+
+        redirect_url = "http://127.0.0.1:8000/api/library/payments/create_payment"
+        return Response(status=status.HTTP_302_FOUND, headers={"Location": redirect_url})
 
     @action(
         methods=["POST"],
