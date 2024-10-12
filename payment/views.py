@@ -10,7 +10,7 @@ from payment.serializers import (
     PaymentSerializer,
     CreatePaymentSerializer,
     PaymentResultSerializer,
-    PaymentRetrieveSerializer,
+    PaymentRetrieveSerializer, CreateFineSerializer,
 )
 
 
@@ -29,6 +29,8 @@ class PaymentViewSet(ModelViewSet):
     def get_serializer_class(self):
         if self.action == "create_payment":
             return CreatePaymentSerializer
+        if self.action == "create_fine":
+            return CreateFineSerializer
         if self.action in ["success", "cancel"]:
             return PaymentResultSerializer
         if self.action == "retrieve":
@@ -44,6 +46,19 @@ class PaymentViewSet(ModelViewSet):
             payment = serializer.save()
             return Response(
                 {"session_url": payment.session_url},
+                status=status.HTTP_201_CREATED,
+            )
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+    @action(detail=False, methods=["POST"], url_path="create_fine")
+    def create_fine(self, request):
+        serializer = CreateFineSerializer(
+            data=request.data, context={"request": request}
+        )
+        if serializer.is_valid():
+            fine = serializer.save()
+            return Response(
+                {"session_url": fine.session_url},
                 status=status.HTTP_201_CREATED,
             )
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
