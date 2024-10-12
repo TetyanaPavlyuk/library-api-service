@@ -14,6 +14,5 @@ def send_borrowing_notification(sender, instance, created, **kwargs):
         transaction.on_commit(lambda: _send_borrowing_notification(instance))
 
 def _send_borrowing_notification(instance):
-    book_titles = ", ".join([book.title for book in instance.book.all()])
-    message = f"New borrowing created: {book_titles} by {instance.user.full_name}"
+    message = f"New borrowing created: {instance.books_in_borrowing} by {instance.user.full_name}"
     asyncio.run(send_telegram_message(message))
