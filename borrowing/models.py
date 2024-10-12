@@ -32,6 +32,10 @@ class Borrowing(models.Model):
         ) * Decimal(delta_days) * Decimal(os.getenv("FINE_MULTIPLIER"))
         return amount
 
+    @property
+    def books_in_borrowing(self):
+        return ", ".join([book.title for book in self.book.all()])
+
     def __str__(self):
         return f"{self.user}: {[book.title for book in self.book.all()]}"
 
