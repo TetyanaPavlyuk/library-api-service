@@ -1,3 +1,4 @@
+import asyncio
 import stripe.checkout
 from rest_framework import status, permissions
 from rest_framework.decorators import action
@@ -10,8 +11,10 @@ from payment.serializers import (
     PaymentSerializer,
     CreatePaymentSerializer,
     PaymentResultSerializer,
-    PaymentRetrieveSerializer, CreateFineSerializer,
+    PaymentRetrieveSerializer,
+    CreateFineSerializer,
 )
+from utils.telegram import send_telegram_message
 
 
 class PaymentViewSet(ModelViewSet):
@@ -78,6 +81,13 @@ class PaymentViewSet(ModelViewSet):
             payment.status = Payment.Status.PAID
             payment.save()
             serializer = PaymentResultSerializer({"message": "Payment was successful"})
+
+            message = (f"New payment was paid: \n"
+                       f"borrowing - {payment.borrowing}, \n"
+                       f"type - {payment.type}, \n"
+                       f"amount - {payment.money_to_pay}$.")
+            asyncio.run(send_telegram_message(message))
+
             return Response(serializer.data, status=status.HTTP_200_OK)
         serializer = PaymentResultSerializer({"message": "Payment not completed"})
         return Response(serializer.data, status=status.HTTP_400_BAD_REQUEST)
