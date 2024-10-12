@@ -11,6 +11,7 @@ https://docs.djangoproject.com/en/5.1/ref/settings/
 """
 
 import os
+import stripe
 from datetime import timedelta
 from pathlib import Path
 
@@ -50,6 +51,7 @@ INSTALLED_APPS = [
     "rest_framework_simplejwt",
     "book",
     "borrowing",
+    "payment",
     "user",
 ]
 
@@ -183,3 +185,5 @@ CELERY_BEAT_SCHEDULE = {
         "schedule": crontab(hour="9", minute="0"),
     }
 }
+
+stripe.api_key = os.getenv("STRIPE_SECRET_KEY")
