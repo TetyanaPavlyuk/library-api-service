@@ -74,5 +74,11 @@ class PaymentViewSet(ModelViewSet):
         permission_classes=(permissions.AllowAny,),
     )
     def cancel(self, request):
-        serializer = PaymentResultSerializer({"message": "Payment was cancelled"})
+        serializer = PaymentResultSerializer(
+            {
+                "message":
+                    "Payment was cancelled. It can be paid a bit later "
+                    "(session is available for only 24h.)"
+            }
+        )
         return Response(serializer.data, status=status.HTTP_200_OK)
