@@ -1,8 +1,14 @@
+import os
+
 from django.contrib.auth import get_user_model
 from django.db import models
 from decimal import Decimal
+from dotenv import load_dotenv
 
 from book.models import Book
+
+
+load_dotenv()
 
 
 class Borrowing(models.Model):
@@ -17,6 +23,13 @@ class Borrowing(models.Model):
     def calculate_payment_amount(self) -> Decimal:
         delta_days = (self.expected_return_date - self.borrow_date).days + 1
         amount = sum([book.daily_fee for book in self.book.all()]) * Decimal(delta_days)
+        return amount
+
+    def calculate_fine_amount(self) -> Decimal:
+        delta_days = (self.actual_return_date - self.expected_return_date).days
+        amount = sum(
+            [book.daily_fee for book in self.book.all()]
+        ) * Decimal(delta_days) * Decimal(os.getenv("FINE_MULTIPLIER"))
         return amount
 
     def __str__(self):
