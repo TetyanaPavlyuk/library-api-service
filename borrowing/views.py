@@ -1,6 +1,7 @@
 from datetime import date
 
 from django.db import transaction
+from drf_spectacular.utils import extend_schema, OpenApiParameter
 from rest_framework import mixins, status
 from rest_framework.decorators import action
 from rest_framework.pagination import PageNumberPagination
@@ -42,9 +43,9 @@ class BorrowingViewSet(
 
         if self.action == "list":
             queryset = queryset.select_related().prefetch_related("book", "payments")
-            if is_active == "true" or is_active == "True":
+            if is_active == "true" or is_active == "True" or is_active == "1":
                 queryset = queryset.filter(actual_return_date__isnull=True)
-            elif is_active == "false" or is_active == "False":
+            elif is_active == "false" or is_active == "False" or is_active == "0":
                 queryset = queryset.filter(actual_return_date__isnull=False)
 
         user = self.request.user
@@ -127,3 +128,22 @@ class BorrowingViewSet(
             {"detail": f"Books {[book.title for book in borrowing.book.all()]} have been returned."},
             status=status.HTTP_200_OK
         )
+
+    @extend_schema(
+        parameters=[
+            OpenApiParameter(
+                name="is_active",
+                description="Filter by is_active borrowing",
+                required=False,
+                type=str
+            ),
+            OpenApiParameter(
+                name="user_id",
+                description="Filter by borrowing user_id",
+                required=False,
+                type={"type": "array", "items": {"type": "number"}},
+            )
+        ]
+    )
+    def list(self, request, *args, **kwargs):
+        return super().list(request, *args, **kwargs)
