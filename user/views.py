@@ -1,5 +1,5 @@
 from django.contrib.auth import get_user_model
-from rest_framework import generics, mixins
+from rest_framework import generics, mixins, permissions
 from rest_framework.permissions import IsAuthenticated, IsAdminUser
 from rest_framework.viewsets import GenericViewSet
 from rest_framework_simplejwt.authentication import JWTAuthentication
@@ -9,7 +9,7 @@ from user.serializers import UserSerializer, UserUpdateSerializer
 
 class CreateUserView(generics.CreateAPIView):
     serializer_class = UserSerializer
-    permission_classes = ()
+    permission_classes = (permissions.AllowAny, )
 
 
 class ManageUserView(generics.RetrieveUpdateAPIView):
