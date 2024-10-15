@@ -39,7 +39,7 @@ class BorrowingViewSet(
     def get_queryset(self):
         queryset = self.queryset
         is_active = self.request.query_params.get("is_active")
-        user_id = self.request.query_params.get("user_id")
+        user_id = self.request.query_params.getlist("user_id")
 
         if self.action == "list":
             queryset = queryset.select_related().prefetch_related("book", "payments")
@@ -50,9 +50,8 @@ class BorrowingViewSet(
 
         user = self.request.user
         if user.is_staff:
-            if user_id is not None:
-                user_id_list = user_id.split(",")
-                queryset = queryset.filter(user_id__in=user_id_list)
+            if user_id:
+                queryset = queryset.filter(user_id__in=user_id)
             return queryset
         return queryset.filter(user=user)
 
