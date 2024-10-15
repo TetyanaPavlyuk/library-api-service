@@ -166,7 +166,6 @@ class AuthenticatedBorrowingAPITests(TestCase):
 
         borrowing_1 = Borrowing.objects.get(id=1)
         serializer = BorrowingUserSerializer(borrowing_1)
-        print(serializer.data)
 
         for book_id in payload["book"]:
             self.assertIn(book_id, serializer.data["book"])
@@ -378,7 +377,6 @@ class AdminBorrowingAPITests(TestCase):
 
         borrowing_1 = Borrowing.objects.get(id=1)
         serializer = BorrowingAdminSerializer(borrowing_1)
-        print(serializer.data)
 
         for book_id in payload["book"]:
             self.assertIn(book_id, serializer.data["book"])
