@@ -11,7 +11,7 @@ from borrowing.serializers import (
     BorrowingListAdminSerializer,
     BorrowingRetrieveSerializer,
     BorrowingUserSerializer,
-    BorrowingAdminSerializer
+    BorrowingAdminSerializer,
 )
 
 BORROWING_URL = reverse("borrowing:borrowing-list")
@@ -105,10 +105,7 @@ class AuthenticatedBorrowingAPITests(TestCase):
         borrowing2.actual_return_date = "2024-10-17"
         borrowing2.save()
 
-        response = self.client.get(
-            BORROWING_URL,
-            {"is_active": "True"}
-        )
+        response = self.client.get(BORROWING_URL, {"is_active": "True"})
 
         serializer_in = BorrowingListUserSerializer(borrowing1)
         serializer_out = BorrowingListUserSerializer(borrowing2)
@@ -197,10 +194,7 @@ class AuthenticatedBorrowingAPITests(TestCase):
 
         response = self.client.put(url, payload)
 
-        self.assertEqual(
-            response.status_code,
-            status.HTTP_403_FORBIDDEN
-        )
+        self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
 
     def test_delete_borrowing_forbidden(self):
         book1 = sample_book(title="Book1")
@@ -276,10 +270,7 @@ class AdminBorrowingAPITests(TestCase):
         borrowing2.actual_return_date = "2024-10-17"
         borrowing2.save()
 
-        response = self.client.get(
-            BORROWING_URL,
-            {"is_active": "True"}
-        )
+        response = self.client.get(BORROWING_URL, {"is_active": "True"})
 
         serializer_in = BorrowingListAdminSerializer(borrowing1)
         serializer_out = BorrowingListAdminSerializer(borrowing2)
@@ -315,10 +306,7 @@ class AdminBorrowingAPITests(TestCase):
         )
         borrowing2.book.add(book4)
 
-        response = self.client.get(
-            BORROWING_URL,
-            {"user_id": [self.user.id, user1.id]}
-        )
+        response = self.client.get(BORROWING_URL, {"user_id": [self.user.id, user1.id]})
 
         serializer_in = BorrowingListAdminSerializer(borrowing)
         serializer_in1 = BorrowingListAdminSerializer(borrowing1)
@@ -411,10 +399,7 @@ class AdminBorrowingAPITests(TestCase):
 
         response = self.client.put(url, payload)
 
-        self.assertEqual(
-            response.status_code,
-            status.HTTP_405_METHOD_NOT_ALLOWED
-        )
+        self.assertEqual(response.status_code, status.HTTP_405_METHOD_NOT_ALLOWED)
 
     def test_delete_borrowing_not_allowed(self):
         book1 = sample_book(title="Book1")

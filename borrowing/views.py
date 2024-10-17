@@ -79,7 +79,10 @@ class BorrowingViewSet(
         user = self.request.user
         if Payment.objects.filter(borrowing__user=user, status="PENDING").exists():
             return Response(
-                {"detail": "You have at least one pending payment - borrowing is forbidden"},
+                {
+                    "detail": "You have at least one pending payment - "
+                              "borrowing is forbidden"
+                },
                 status=status.HTTP_403_FORBIDDEN,
             )
         serializer = self.get_serializer(data=request.data)
@@ -87,13 +90,15 @@ class BorrowingViewSet(
         self.perform_create(serializer)
 
         redirect_url = "http://127.0.0.1:8000/api/library/payments/create_payment"
-        return Response(status=status.HTTP_302_FOUND, headers={"Location": redirect_url})
+        return Response(
+            status=status.HTTP_302_FOUND, headers={"Location": redirect_url}
+        )
 
     @action(
         methods=["POST"],
         detail=True,
         url_path="return",
-        permission_classes=(IsAuthenticated, )
+        permission_classes=(IsAuthenticated,),
     )
     def return_book(self, request, pk=None):
         borrowing = self.get_object()
@@ -102,7 +107,7 @@ class BorrowingViewSet(
         if borrowing.actual_return_date is not None:
             return Response(
                 {"detail": "Books have already been returned."},
-                status=status.HTTP_400_BAD_REQUEST
+                status=status.HTTP_400_BAD_REQUEST,
             )
 
         with transaction.atomic():
@@ -116,16 +121,20 @@ class BorrowingViewSet(
             redirect_url = "http://127.0.0.1:8000/api/library/payments/create_fine"
             return Response(
                 {
-                    "detail": f"Books {[book.title for book in borrowing.book.all()]} have been returned. "
-                           f"Borrowing is overdue. Please pay the fine.",
-                    "fine_url": redirect_url
+                    "detail": f"Books {[book.title for book in borrowing.book.all()]} "
+                              f"have been returned. "
+                    f"Borrowing is overdue. Please pay the fine.",
+                    "fine_url": redirect_url,
                 },
-                status=status.HTTP_200_OK
+                status=status.HTTP_200_OK,
             )
 
         return Response(
-            {"detail": f"Books {[book.title for book in borrowing.book.all()]} have been returned."},
-            status=status.HTTP_200_OK
+            {
+                "detail": f"Books {[book.title for book in borrowing.book.all()]} "
+                          f"have been returned."
+            },
+            status=status.HTTP_200_OK,
         )
 
     @extend_schema(
@@ -134,14 +143,14 @@ class BorrowingViewSet(
                 name="is_active",
                 description="Filter by is_active borrowing",
                 required=False,
-                type=str
+                type=str,
             ),
             OpenApiParameter(
                 name="user_id",
                 description="Filter by borrowing user_id",
                 required=False,
                 type={"type": "array", "items": {"type": "number"}},
-            )
+            ),
         ]
     )
     def list(self, request, *args, **kwargs):

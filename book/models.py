@@ -20,5 +20,8 @@ class Book(models.Model):
     class Meta:
         ordering = ["title"]
         constraints = [
-            models.CheckConstraint(condition=Q(inventory__gte=0), name="inventory_gte_0")
+            models.CheckConstraint(
+                condition=Q(inventory__gte=0),
+                name="inventory_gte_0"
+            )
         ]

@@ -18,12 +18,15 @@ class Command(BaseCommand):
                 db_up = True
             except OperationalError:
                 attempts += 1
-                self.stdout.write(f"Database unavailable, waiting 1 second..."
-                                  f"( attempt {attempts}/{max_attempts})")
+                self.stdout.write(
+                    f"Database unavailable, waiting 1 second..."
+                    f"( attempt {attempts}/{max_attempts})"
+                )
                 time.sleep(1)
 
         if db_up:
             self.stdout.write(self.style.SUCCESS("Database available!"))
         else:
-            self.stdout.write(self.style.ERROR("Database not available after"
-                                               " maximum attempts!"))
+            self.stdout.write(
+                self.style.ERROR("Database not available after" " maximum attempts!")
+            )

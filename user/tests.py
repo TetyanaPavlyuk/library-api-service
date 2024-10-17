@@ -88,10 +88,7 @@ class AdminUserApiTests(TestCase):
 
         response = self.client.put(url, payload)
 
-        self.assertEqual(
-            response.status_code,
-            status.HTTP_200_OK
-        )
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
 
     def test_delete_user_not_allowed(self):
         user = sample_user(email="some@mail.com")
@@ -99,7 +96,4 @@ class AdminUserApiTests(TestCase):
 
         response = self.client.delete(url)
 
-        self.assertEqual(
-            response.status_code,
-            status.HTTP_405_METHOD_NOT_ALLOWED
-        )
+        self.assertEqual(response.status_code, status.HTTP_405_METHOD_NOT_ALLOWED)

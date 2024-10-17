@@ -9,7 +9,7 @@ from user.serializers import UserSerializer, UserUpdateSerializer
 
 class CreateUserView(generics.CreateAPIView):
     serializer_class = UserSerializer
-    permission_classes = (permissions.AllowAny, )
+    permission_classes = (permissions.AllowAny,)
 
 
 class ManageUserView(generics.RetrieveUpdateAPIView):
@@ -26,11 +26,11 @@ class UserViewSet(
     mixins.ListModelMixin,
     mixins.RetrieveModelMixin,
     mixins.UpdateModelMixin,
-    GenericViewSet
+    GenericViewSet,
 ):
     queryset = get_user_model().objects.all()
     authentication_classes = (JWTAuthentication,)
-    permission_classes = (IsAdminUser, )
+    permission_classes = (IsAdminUser,)
 
     def get_serializer_class(self):
         if self.action == "update":

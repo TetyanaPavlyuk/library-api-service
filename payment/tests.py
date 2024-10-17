@@ -7,10 +7,7 @@ from rest_framework.test import APIClient
 from book.models import Book
 from borrowing.models import Borrowing
 from payment.models import Payment
-from payment.serializers import (
-    PaymentSerializer,
-    PaymentRetrieveSerializer
-)
+from payment.serializers import PaymentSerializer, PaymentRetrieveSerializer
 
 PAYMENT_URL = reverse("payment:payment-list")
 
@@ -81,16 +78,10 @@ class AuthenticatedPaymentAPITests(TestCase):
         borrowing.book.add(book2)
         borrowing.save()
 
-        Payment.objects.create(
-            type="PAYMENT",
-            borrowing=borrowing
-        )
+        Payment.objects.create(type="PAYMENT", borrowing=borrowing)
 
         borrowing_other = sample_borrowing()
-        Payment.objects.create(
-            type="PAYMENT",
-            borrowing=borrowing_other
-        )
+        Payment.objects.create(type="PAYMENT", borrowing=borrowing_other)
 
         response = self.client.get(PAYMENT_URL)
 
@@ -112,10 +103,7 @@ class AuthenticatedPaymentAPITests(TestCase):
         borrowing.book.add(book2)
         borrowing.save()
 
-        payment = Payment.objects.create(
-            type="PAYMENT",
-            borrowing=borrowing
-        )
+        payment = Payment.objects.create(type="PAYMENT", borrowing=borrowing)
 
         url = detail_url(payment.id)
         response = self.client.get(url)
@@ -127,8 +115,7 @@ class AuthenticatedPaymentAPITests(TestCase):
     def test_retrieve_other_payment_not_found(self):
         borrowing_other = sample_borrowing()
         payment_other = Payment.objects.create(
-            type="PAYMENT",
-            borrowing=borrowing_other
+            type="PAYMENT", borrowing=borrowing_other
         )
 
         url = detail_url(payment_other.id)
@@ -148,10 +135,7 @@ class AuthenticatedPaymentAPITests(TestCase):
         borrowing.book.add(book2)
         borrowing.save()
 
-        payment = Payment.objects.create(
-            type="PAYMENT",
-            borrowing=borrowing
-        )
+        payment = Payment.objects.create(type="PAYMENT", borrowing=borrowing)
 
         payload = {
             "type": "FINE",
@@ -161,10 +145,7 @@ class AuthenticatedPaymentAPITests(TestCase):
 
         response = self.client.put(url, payload)
 
-        self.assertEqual(
-            response.status_code,
-            status.HTTP_403_FORBIDDEN
-        )
+        self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
 
     def test_delete_payment_forbidden(self):
         book1 = sample_book(title="Book1")
@@ -178,10 +159,7 @@ class AuthenticatedPaymentAPITests(TestCase):
         borrowing.book.add(book2)
         borrowing.save()
 
-        payment = Payment.objects.create(
-            type="PAYMENT",
-            borrowing=borrowing
-        )
+        payment = Payment.objects.create(type="PAYMENT", borrowing=borrowing)
 
         url = detail_url(payment.id)
 
@@ -208,16 +186,10 @@ class AdminPaymentAPITests(TestCase):
         borrowing.book.add(book2)
         borrowing.save()
 
-        Payment.objects.create(
-            type="PAYMENT",
-            borrowing=borrowing
-        )
+        Payment.objects.create(type="PAYMENT", borrowing=borrowing)
 
         borrowing_other = sample_borrowing()
-        Payment.objects.create(
-            type="PAYMENT",
-            borrowing=borrowing_other
-        )
+        Payment.objects.create(type="PAYMENT", borrowing=borrowing_other)
 
         response = self.client.get(PAYMENT_URL)
 
@@ -239,10 +211,7 @@ class AdminPaymentAPITests(TestCase):
         borrowing.book.add(book2)
         borrowing.save()
 
-        payment = Payment.objects.create(
-            type="PAYMENT",
-            borrowing=borrowing
-        )
+        payment = Payment.objects.create(type="PAYMENT", borrowing=borrowing)
 
         url = detail_url(payment.id)
         response = self.client.get(url)
@@ -254,8 +223,7 @@ class AdminPaymentAPITests(TestCase):
     def test_retrieve_payment_other_users(self):
         borrowing_other = sample_borrowing()
         payment_other = Payment.objects.create(
-            type="PAYMENT",
-            borrowing=borrowing_other
+            type="PAYMENT", borrowing=borrowing_other
         )
 
         url = detail_url(payment_other.id)
@@ -277,10 +245,7 @@ class AdminPaymentAPITests(TestCase):
         borrowing.book.add(book2)
         borrowing.save()
 
-        payment = Payment.objects.create(
-            type="PAYMENT",
-            borrowing=borrowing
-        )
+        payment = Payment.objects.create(type="PAYMENT", borrowing=borrowing)
 
         payload = {
             "type": "FINE",
@@ -290,10 +255,7 @@ class AdminPaymentAPITests(TestCase):
 
         response = self.client.put(url, payload)
 
-        self.assertEqual(
-            response.status_code,
-            status.HTTP_403_FORBIDDEN
-        )
+        self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
 
     def test_delete_payment_forbidden(self):
         book1 = sample_book(title="Book1")
@@ -307,10 +269,7 @@ class AdminPaymentAPITests(TestCase):
         borrowing.book.add(book2)
         borrowing.save()
 
-        payment = Payment.objects.create(
-            type="PAYMENT",
-            borrowing=borrowing
-        )
+        payment = Payment.objects.create(type="PAYMENT", borrowing=borrowing)
 
         url = detail_url(payment.id)
 

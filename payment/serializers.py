@@ -1,7 +1,10 @@
 from django.db.models import Q, F
 from rest_framework import serializers
 
-from utils.stripe import create_stripe_session_for_payment, create_stripe_session_for_fine
+from utils.stripe import (
+    create_stripe_session_for_payment,
+    create_stripe_session_for_fine,
+)
 from borrowing.models import Borrowing
 from payment.models import Payment
 
@@ -88,8 +91,8 @@ class CreateFineSerializer(serializers.Serializer):
         if "request" in self.context:
             user = self.context["request"].user
             borrowing_overdue = Borrowing.objects.filter(
-                Q(actual_return_date__isnull=False) &
-                Q(expected_return_date__lt=F("actual_return_date"))
+                Q(actual_return_date__isnull=False)
+                & Q(expected_return_date__lt=F("actual_return_date"))
             )
             paid_borrowing_fine_ids = Payment.objects.filter(
                 type="FINE", status="PAID"
@@ -112,12 +115,8 @@ class CreateFineSerializer(serializers.Serializer):
     def validate(self, data):
         borrowing = data.get("borrowing")
 
-        if Payment.objects.filter(
-            borrowing=borrowing, type=Payment.Type.FINE
-        ).exists():
-            raise serializers.ValidationError(
-                "Fine already exist for this Borrowing"
-            )
+        if Payment.objects.filter(borrowing=borrowing, type=Payment.Type.FINE).exists():
+            raise serializers.ValidationError("Fine already exist for this Borrowing")
         return data
 
     def create(self, validated_data):

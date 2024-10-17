@@ -29,9 +29,11 @@ class Borrowing(models.Model):
     def calculate_fine_amount(self) -> Decimal:
         if self.actual_return_date > self.expected_return_date:
             delta_days = (self.actual_return_date - self.expected_return_date).days
-            amount = sum(
-                [book.daily_fee for book in self.book.all()]
-            ) * Decimal(delta_days) * Decimal(os.getenv("FINE_MULTIPLIER"))
+            amount = (
+                sum([book.daily_fee for book in self.book.all()])
+                * Decimal(delta_days)
+                * Decimal(os.getenv("FINE_MULTIPLIER"))
+            )
             return amount
         raise ValidationError("Borrowing is not overdue")
 

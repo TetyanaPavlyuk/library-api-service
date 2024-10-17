@@ -10,8 +10,7 @@ from utils.telegram import send_telegram_message
 def check_borrowings_overdue():
     overdue_date = date.today() + timedelta(days=1)
     overdue_borrowings = Borrowing.objects.filter(
-        expected_return_date__lte=overdue_date,
-        actual_return_date__isnull=True
+        expected_return_date__lte=overdue_date, actual_return_date__isnull=True
     )
 
     if overdue_borrowings.exists():

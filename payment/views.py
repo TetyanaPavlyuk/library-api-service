@@ -82,10 +82,12 @@ class PaymentViewSet(ModelViewSet):
             payment.save()
             serializer = PaymentResultSerializer({"message": "Payment was successful"})
 
-            message = (f"New payment was paid: \n"
-                       f"borrowing - {payment.borrowing}, \n"
-                       f"type - {payment.type}, \n"
-                       f"amount - {payment.money_to_pay}$.")
+            message = (
+                f"New payment was paid: \n"
+                f"borrowing - {payment.borrowing}, \n"
+                f"type - {payment.type}, \n"
+                f"amount - {payment.money_to_pay}$."
+            )
             asyncio.run(send_telegram_message(message))
 
             return Response(serializer.data, status=status.HTTP_200_OK)
@@ -101,9 +103,8 @@ class PaymentViewSet(ModelViewSet):
     def cancel(self, request):
         serializer = PaymentResultSerializer(
             {
-                "message":
-                    "Payment was cancelled. It can be paid a bit later "
-                    "(session is available for only 24h.)"
+                "message": "Payment was cancelled. It can be paid a bit later "
+                "(session is available for only 24h.)"
             }
         )
         return Response(serializer.data, status=status.HTTP_200_OK)
