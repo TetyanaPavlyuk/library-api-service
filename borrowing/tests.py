@@ -164,7 +164,10 @@ class AuthenticatedBorrowingAPITests(TestCase):
         self.assertEqual(response.status_code, status.HTTP_302_FOUND)
         self.assertIn("Location", response.headers)
 
-        borrowing_1 = Borrowing.objects.get(id=1)
+        borrowing_1 = Borrowing.objects.get(
+            expected_return_date=payload["expected_return_date"],
+            user=payload["user"],
+        )
         serializer = BorrowingUserSerializer(borrowing_1)
 
         for book_id in payload["book"]:
@@ -375,7 +378,10 @@ class AdminBorrowingAPITests(TestCase):
         self.assertEqual(response.status_code, status.HTTP_302_FOUND)
         self.assertIn("Location", response.headers)
 
-        borrowing_1 = Borrowing.objects.get(id=1)
+        borrowing_1 = Borrowing.objects.get(
+            expected_return_date=payload["expected_return_date"],
+            user=payload["user"],
+        )
         serializer = BorrowingAdminSerializer(borrowing_1)
 
         for book_id in payload["book"]:
